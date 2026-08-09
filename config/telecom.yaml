@@ -1,0 +1,63 @@
+project:
+  name: Telecom Service Assurance
+  version: "1.0"
+  description: Flagship configuration — telecom incident data (Project 2)
+
+dataset:
+  grain_column: Incident_ID
+  date_column: Date
+  time_grain: week
+
+database:
+  view: vw_incident_flat
+
+dimensions:
+  - State_UT
+  - City
+  - Zone
+  - Vendor
+  - Technology
+  - Severity
+  - Fault_Category
+  - Resolution_Type
+
+measures:
+  - Resolution_Minutes
+  - Customers_Impacted
+  - Dispatch_Cost
+  - Estimated_Total_Incident_Cost
+
+flags:
+  - SLA_Breach_Flag
+  - Repeat_Fault_Flag
+  - Escalation_Flag
+
+kpis:
+  incident_count:
+    label: Total Incidents
+    type: count
+
+  sla_breach_rate:
+    label: SLA Breach Rate %
+    type: rate
+    column: SLA_Breach_Flag
+
+  avg_resolution_time:
+    label: Average Resolution Time (minutes)
+    type: average
+    column: Resolution_Minutes
+
+  total_cost:
+    label: Total Cost-to-Serve
+    type: sum
+    column: Estimated_Total_Incident_Cost
+
+thresholds:
+  sla_breach_rate:
+    direction: lower_is_better
+    good: 0.06
+    warning: 0.10
+
+business_assumptions:
+  currency: INR
+  time_unit: Minutes
