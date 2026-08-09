@@ -26,3 +26,11 @@ def get_engine() -> Engine:
         _engine = create_engine(database_url)
 
     return _engine
+def reset_engine() -> None:
+    """
+    Reset the cached engine.
+
+    Used only by unit tests to isolate test cases.
+    """
+    global _engine
+    _engine = None
