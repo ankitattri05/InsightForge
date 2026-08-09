@@ -1,0 +1,10 @@
+PyYAML
+SQLAlchemy
+PyMySQL
+python-dotenv
+pytest
+google-genai
+python-docx
+reportlab
+pandas
+numpy
