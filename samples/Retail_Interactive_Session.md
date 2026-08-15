@@ -1,0 +1,65 @@
+# Retail Sales Analytics — Interactive Analyst Session
+
+The following transcript demonstrates representative interactions with the InsightForge Interactive Analyst using verified deterministic business findings.
+
+
+
+- InsightForge > What is the total sales?
+
+Total sales for the reporting period were ₹12,642,905.00.
+
+This figure represents total sales revenue generated during the period and is best interpreted using historical trends and period-over-period comparison rather than fixed thresholds.
+
+- InsightForge > What is the total profit?
+
+Total profit generated during the reporting period was ₹1,469,034.09.
+
+This metric is reported descriptively, as it should be interpreted using historical trends and period-over-period comparison rather than fixed thresholds.
+
+- InsightForge > What is the profit margin?
+
+The profit margin for the reporting period is 11.62%, representing the overall percentage of sales retained as profit.
+
+This metric is reported descriptively, as evaluation requires historical comparison or target benchmarks.
+
+- InsightForge > Which market generated the highest sales?
+
+The APAC market generated the highest sales, totaling ₹3,585,833.00 during the reporting period.
+
+This compares to ₹2,938,139.00 for EU and ₹2,297,354.00 for US, the next highest markets in the observed ranking.
+
+- InsightForge > Which category generated the highest profit?
+
+Technology generated the highest profit among categories, with ₹663,779.25 in profit during the reporting period.
+
+Office Supplies followed with ₹518,472.74, and Furniture recorded the lowest profit among the three categories at ₹286,782.10.
+
+- InsightForge > Which subcategory generated the lowest profit?
+
+The subcategory that generated the lowest profit was Tables, with a reported profit of -₹64,083.55.
+
+This figure reflects a negative value, indicating that Tables recorded a net loss during the reporting period rather than a low positive profit.
+
+- InsightForge > Which ship mode incurred the highest shipping cost?
+
+Standard Class incurred the highest shipping cost, at ₹614,630.76.
+
+This compares to ₹314,112.62 for Second Class and ₹308,103.25 for First Class, the next highest contributors identified in the diagnostics.
+
+- InsightForge > Summarize the business performance. 
+
+During the reporting period, the business generated total sales of ₹12,642,905.00 and total profit of ₹1,469,034.09, reflecting an overall profit margin of 11.62%. The business processed 51,290 orders totaling 178,312 units sold, with an average order value of ₹246.50. Average shipping time was 3.97 days, and total shipping cost incurred was ₹1,352,820.69.
+
+These metrics are reported descriptively, as evaluation requires historical trends or benchmark comparisons rather than fixed thresholds. Diagnostics identified Tables as the lowest-performing subcategory by profit, at -₹64,083.55,while Technology led profit contribution among categories at ₹663,779.25.
+
+- InsightForge >  Was profit higher than last year?
+
+Total profit for the reporting period was ₹1,469,034.09. No verified year-over-year comparison has been supplied, so it cannot be confirmed whether this is higher or lower than last year.
+
+This metric is reported descriptively because additional verified historical comparison evidence is required for evaluation.
+
+- InsightForge > Why did Tables lose money? 
+
+Tables recorded a net loss of -₹64,083.55 during the reporting period, making it the lowest-performing subcategory by profit among those measured.
+
+This figure is reported descriptively, as no additional verified evidence explaining the cause of the loss has been supplied.
