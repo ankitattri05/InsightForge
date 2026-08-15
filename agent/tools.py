@@ -7,6 +7,8 @@ to the LLM.
 """
 
 from typing import Optional, TypedDict
+from engine.interpreter_telecom import interpret_metric
+from engine.interpreter_retail import interpret_retail_metric
 
 from engine.config_loader import load_config
 from engine.metrics import calculate_metric
@@ -44,12 +46,18 @@ def initialize(
     ]
 
     if failures:
-        raise RuntimeError(
-            f"Startup validation failed: {failures}"
-        )
+        from pprint import pprint
+
+        pprint(failures)
+        raise RuntimeError("Startup validation failed.")
 
     _validation_passed = True
 
+def get_config() -> dict:
+    """
+    Return the loaded project configuration.
+    """
+    return _config
 
 def _require_validation() -> None:
     """
@@ -72,12 +80,12 @@ def get_metric(metric_name: str) -> ToolResult:
     try:
         value = calculate_metric(metric_name, _config)
 
-    except ValueError:
+    except Exception as e:
         return {
-            "success": False,
-            "data": None,
-            "error": f"Unknown KPI: '{metric_name}'",
-        }
+        "success": False,
+        "data": None,
+        "error": str(e),
+    }
 
     if value is None:
         return {
@@ -86,11 +94,28 @@ def get_metric(metric_name: str) -> ToolResult:
             "error": "No data available for this KPI.",
         }
 
+    project = _config["project"]["name"]
+
+    if project == "Telecom Service Assurance":
+        finding = interpret_metric(
+            metric_name,
+            value,
+            _config,
+        )
+    else:
+        finding = interpret_retail_metric(
+            metric_name,
+            value,
+            _config,
+    )
+
     return {
         "success": True,
         "data": {
             "metric": metric_name,
             "value": value,
+            "display_value": _format_metric(metric_name, value),
+            "finding": finding,
         },
         "error": None,
     }
@@ -107,3 +132,50 @@ def get_metrics(
         get_metric(metric_name)
         for metric_name in metric_names
     ]
+
+def get_config() -> dict:
+    """
+    Return the active semantic configuration.
+    """
+    return _config
+
+def _format_metric(
+    metric_name: str,
+    value: float,
+) -> str:
+    """
+    Return a deterministic display string for a KPI.
+    """
+
+    if metric_name in {
+        "incident_count",
+        "customers_impacted",
+        "orders",
+        "quantity",
+    }:
+        return f"{value:,.0f}"
+
+    if metric_name in {
+        "sla_breach_rate",
+        "profit_margin",
+    }:
+        return f"{value:.2%}"
+
+    if metric_name == "avg_resolution_time":
+        return f"{value:.2f} minutes"
+
+    if metric_name == "avg_shipping_days":
+        return f"{value:.2f} days"
+
+    if metric_name in {
+        "total_cost",
+        "dispatch_cost",
+        "cost_per_incident",
+        "sales",
+        "profit",
+        "shipping_cost",
+        "average_order_value",
+    }:
+         return f"₹{value:,.2f}"
+
+    return str(value)

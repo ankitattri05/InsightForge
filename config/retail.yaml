@@ -1,0 +1,83 @@
+project:
+  name: Retail Sales Analytics
+  version: "1.0"
+  description: Flagship configuration — retail sales data
+
+dataset:
+  grain_column: order_id
+  date_column: order_date
+  time_grain: week
+
+database:
+  view: vw_sales_flat
+
+dimensions:
+  - market
+  - region
+  - country
+  - state
+  - segment
+  - category
+  - sub_category
+  - ship_mode
+  - order_priority
+
+measures:
+  - sales
+  - profit
+  - quantity
+  - shipping_cost
+  - discount
+  - time_for_shipping
+
+flags:
+  - SLA_Breach_Flag
+  - Repeat_Fault_Flag
+  - Escalation_Flag
+
+kpis:
+
+  sales:
+    label: Total Sales
+    type: sum
+    column: sales
+
+  profit:
+    label: Total Profit
+    type: sum
+    column: profit
+
+  profit_margin:
+    label: Profit Margin %
+    type: calculated
+    formula: "profit / sales"
+
+  average_order_value:
+    label: Average Order Value
+    type: calculated
+    formula: "sales / order_id"
+
+  orders:
+    label: Total Orders
+    type: count
+
+  quantity:
+    label: Units Sold
+    type: sum
+    column: quantity
+
+  avg_shipping_days:
+    label: Average Shipping Time (days)
+    type: average
+    column: time_for_shipping
+
+  shipping_cost:
+    label: Total Shipping Cost
+    type: sum
+    column: shipping_cost
+
+thresholds: {}
+
+business_assumptions:
+  currency: INR
+  time_unit: Minutes

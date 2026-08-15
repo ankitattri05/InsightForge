@@ -36,7 +36,7 @@ kpis:
   incident_count:
     label: Total Incidents
     type: count
-
+  
   sla_breach_rate:
     label: SLA Breach Rate %
     type: rate
@@ -51,6 +51,20 @@ kpis:
     label: Total Cost-to-Serve
     type: sum
     column: Estimated_Total_Incident_Cost
+
+  dispatch_cost:
+    label: "Total Dispatch Cost"
+    type: sum
+    column: Dispatch_Cost
+
+  customers_impacted:
+    label: "Customers Impacted"
+    type: sum
+    column: Customers_Impacted
+
+  cost_per_incident:
+    label: Cost per Incident
+    type: calculated
 
 thresholds:
   sla_breach_rate:

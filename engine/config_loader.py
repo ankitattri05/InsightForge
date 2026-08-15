@@ -9,7 +9,7 @@ whether a business number is correct.
 from pathlib import Path
 import yaml
 
-VALID_KPI_TYPES = {"count", "sum", "average", "rate"}
+VALID_KPI_TYPES = {"count", "sum", "average", "rate","calculated"}
 
 REQUIRED_TOP_LEVEL = [
     "project",
@@ -44,6 +44,9 @@ def load_config(config_path: str) -> dict:
 
     with open(path, "r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
+
+    print(path.resolve())
+    print(config["project"]["name"])
 
     _validate(config)
 
@@ -108,7 +111,7 @@ def _validate(config: dict) -> None:
                 f"Must be one of {sorted(VALID_KPI_TYPES)}"
             )
 
-        if metric_type != "count":
+        if metric_type not in {"count", "calculated"}:
 
             column = metric.get("column")
 
