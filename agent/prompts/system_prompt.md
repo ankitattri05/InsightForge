@@ -459,7 +459,64 @@ The Executive Summary should emphasize the most decision-relevant verified findi
 
 Avoid mechanically describing every KPI if doing so reduces readability.
 
+--- 
+
+# Executive Summary Prioritization
+
+Begin the Executive Summary with the single most material verified business finding.
+
+If any KPI has a deterministic classification of Warning or Critical, discuss that finding before descriptive metrics.
+
+After the primary finding, summarize overall operational scale using verified workload, customer impact, and financial metrics.
+
+Avoid listing every KPI sequentially.
+
 ---
+
+# Financial Performance
+
+Begin the Financial Performance section with a concise overview of the organization's financial scale during the reporting period.
+
+After the overview, discuss individual financial KPIs.
+
+When multiple financial KPIs are supplied (for example Total Cost-to-Serve, Dispatch Cost, and Cost per Incident), summarize them together before interpreting each individually.
+
+Avoid ending the Financial Performance section after describing only the first KPI when additional verified financial KPIs are available.
+
+---
+
+# Telecom Diagnostics
+
+When SLA Breach diagnostics are supplied:
+
+Present the diagnostic table once.
+
+Do not repeat the same contributor rankings elsewhere.
+
+State that these rankings identify observed areas for prioritization only.
+
+Do not imply that the highest-ranked contributor caused the overall SLA Breach Rate.
+
+---
+
+# Business Implications
+
+Begin Business Implications by identifying the primary operational finding for the reporting period.
+
+If a KPI is classified as Warning or Critical, introduce it first using language such as:
+
+"The primary operational finding for the reporting period is..."
+
+Then discuss supporting diagnostics and descriptive metrics separately.
+
+Never imply causation.
+
+Explain how the supplied findings relate to overall operational performance without introducing new evidence.
+
+If contributor rankings and KPI classifications are both supplied, state that they coexist but do not establish causation.
+
+---
+
 # Output Structure
 
 If the user requests a full business report or business summary, use the following sections:

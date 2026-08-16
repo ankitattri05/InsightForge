@@ -116,7 +116,6 @@ Change: {result['data']['finding']['comparison']['change_pct']}%"""
     "Report Metadata\n"
     f"Project: {tools.get_config()['project']['name']}\n"
     f"Version: {tools.get_config()['project']['version']}\n"
-    f"Database View: {tools.get_config()['database']['view']}\n"
     f"Reporting Period: {period['start_date']} to {period['end_date']}\n\n"
 
     "Currency: ₹\n"
@@ -138,7 +137,7 @@ Change: {result['data']['finding']['comparison']['change_pct']}%"""
     response = _client.messages.create(
         model=_model,
         system=_system_prompt,
-        max_tokens=2200,
+        max_tokens=4096,
         messages=[
             {
                 "role": "user",
@@ -222,45 +221,125 @@ def answer(question: str) -> str:
         raise RuntimeError("Narrator has not been initialized.")
 
     question_lower = question.lower()
+    project = tools.get_config()["project"]["name"]
 
     # ----------------------------
     # Deterministic KPI routing
     # ----------------------------
 
-    if "business performance" in question_lower:
-        metric_names = [
-            "sales",
-            "profit",
-            "profit_margin",
-            "average_order_value",
-            "orders",
-            "quantity",
-            "avg_shipping_days",
-            "shipping_cost",
-        ]
+    if project == "Retail Sales Analytics":
 
-    elif "profit margin" in question_lower:
-        metric_names = ["profit_margin"]
+        if "business performance" in question_lower:
+            metric_names = [
+                "sales",
+                "profit",
+                "profit_margin",
+                "average_order_value",
+                "orders",
+                "quantity",
+                "avg_shipping_days",
+                "shipping_cost",
+            ]
 
-    elif "shipping cost" in question_lower:
-        metric_names = ["shipping_cost"]
+        elif "profit margin" in question_lower:
+            metric_names = ["profit_margin"]
 
-    elif "sales" in question_lower:
-        metric_names = ["sales"]
+        elif "shipping cost" in question_lower:
+            metric_names = ["shipping_cost"]
 
-    elif (
-        "tables" in question_lower
-        or "subcategory" in question_lower
-        or "lose money" in question_lower
-        or "loss" in question_lower
-    ):
-        metric_names = ["profit"]
+        elif "sales" in question_lower:
+            metric_names = ["sales"]
 
-    elif "profit" in question_lower:
-        metric_names = ["profit"]
+        elif (
+            "tables" in question_lower
+            or "subcategory" in question_lower
+            or "lose money" in question_lower
+            or "loss" in question_lower
+        ):
+            metric_names = ["profit"]
+
+        elif "profit" in question_lower:
+            metric_names = ["profit"]
+
+        else:
+            return "Sorry, I couldn't determine which KPI(s) you are asking about."
 
     else:
-        return "Sorry, I couldn't determine which KPI(s) you are asking about."
+
+        if (
+            "service assurance" in question_lower
+            or "business performance" in question_lower
+            or "summary" in question_lower
+            or "management" in question_lower
+            or "focus" in question_lower
+            or "priority" in question_lower
+        ):
+            metric_names = [
+                "incident_count",
+                "sla_breach_rate",
+                "avg_resolution_time",
+                "total_cost",
+                "dispatch_cost",
+                "customers_impacted",
+                "cost_per_incident",
+            ]
+
+        elif (
+            "incident count" in question_lower
+            or "total incident" in question_lower
+            or "incidents" in question_lower
+        ):
+            metric_names = ["incident_count"]
+
+        elif (
+            "sla" in question_lower
+            or "breach" in question_lower
+            or "vendor" in question_lower
+            or "tejas" in question_lower
+            or "zte" in question_lower
+            or "nokia" in question_lower
+            or "goa" in question_lower
+            or "bihar" in question_lower
+            or "uttarakhand" in question_lower
+            or "optical network" in question_lower
+            or "power & environment" in question_lower
+            or "access equipment" in question_lower
+            or "field engineer" in question_lower
+            or "hire" in question_lower
+            or "replace" in question_lower
+        ):
+            metric_names = ["sla_breach_rate"]
+
+        elif "resolution" in question_lower:
+            metric_names = ["avg_resolution_time"]
+
+        elif "dispatch" in question_lower:
+            metric_names = ["dispatch_cost"]
+
+        elif (
+            "customer" in question_lower
+            and "impact" in question_lower
+        ):
+            metric_names = ["customers_impacted"]
+
+        elif (
+            "cost per incident" in question_lower
+        ):
+            metric_names = ["cost_per_incident"]
+
+        elif (
+            "cost-to-serve" in question_lower
+            or "cost to serve" in question_lower
+            or "total cost" in question_lower
+        ):
+            metric_names = ["total_cost"]
+
+        else:
+            return "Sorry, I couldn't determine which KPI(s) you are asking about."
+
+    # ----------------------------
+    # Fetch verified findings
+    # ----------------------------
 
     results = tools.get_metrics(metric_names)
 
@@ -284,7 +363,7 @@ Diagnostics: {r['data']['finding'].get('diagnostics', {})}
     period = reporting_period(
         view=config["database"]["view"],
         date_column=config["dataset"]["date_column"],
-)
+    )
 
     response = _client.messages.create(
         model=_model,
@@ -293,47 +372,43 @@ Diagnostics: {r['data']['finding'].get('diagnostics', {})}
         messages=[
             {
                 "role": "user",
-                "content":(
-                    f"""User Question:
-                    {question}
+                "content": f"""User Question:
+{question}
 
-                    Project: {config["project"]["name"]}
-                    Reporting Period: {period["start_date"]} to {period["end_date"]}
+Project: {config["project"]["name"]}
+Reporting Period: {period["start_date"]} to {period["end_date"]}
 
-                    Answer ONLY the user's question.
+Answer ONLY the user's question.
 
-                    Keep the answer under 150 words.
+Keep the answer under 150 words.
 
-                    For single-metric questions:
+For single-metric questions:
 
-                        Return plain text only.
+Return plain text only.
 
-                        Do NOT generate:
-                        - report headers
-                        - project metadata
-                        - markdown headings
-                        - section titles
-                        - executive report structure
+Do NOT generate:
+- report headers
+- project metadata
+- markdown headings
+- section titles
+- executive report structure
 
-                        Respond using exactly two short paragraphs:
+Respond using exactly two short paragraphs.
 
-                        Paragraph 1:
-                        Answer the user's question directly using the verified metric.
+Paragraph 1:
+Answer the user's question directly using the verified metric.
 
-                        Paragraph 2:
-                        Include one brief evidence-based explanatory sentence only if supplied by the deterministic findings.
+Paragraph 2:
+Include one brief evidence-based explanatory sentence only if supplied by the deterministic findings.
 
-                        Do not generate anything else.
+Use ONLY the verified findings below.
 
-                    Use ONLY the verified findings below.
+Preserve all monetary values exactly as supplied, including the ₹ symbol.
 
-                    Preserve all monetary values exactly as supplied, including the ₹ symbol.
+Verified Findings:
 
-                    Verified Findings:
-
-       {facts}
-       """
-),
+{facts}
+""",
             }
         ],
     )

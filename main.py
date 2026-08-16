@@ -43,7 +43,7 @@ def main() -> None:
     # ----------------------------
 
     tools.initialize(
-        "config/retail.yaml",
+         "config/telecom.yaml",
         EXPECTED_METRICS,
     )
 
@@ -89,11 +89,11 @@ def main() -> None:
     print("Type 'exit' to quit.")
     print()
     print("Example questions:")
-    print("- What is the profit margin?")
-    print("- Which market generated the highest sales?")
-    print("- Which category generated the highest profit?")
-    print("- Which ship mode incurred the highest shipping cost?")
-    print("- Summarize the business performance.")
+    print("- What is the SLA breach rate?")
+    print("- Which state has the highest SLA breach rate?")
+    print("- Which vendor has the highest SLA breach rate?")
+    print("- Which fault category has the highest SLA breach rate?")
+    print("- Summarize the service assurance performance.")
     print("=" * 80)
 
     try:
