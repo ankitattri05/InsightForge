@@ -1,64 +1,83 @@
 # InsightForge – Executive Analytics Platform
 
-A configuration-driven analytics platform that converts verified business metrics into executive-ready reports while ensuring that every insight is backed by deterministic analytics rather than AI-generated reasoning.
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-orange)
+![YAML](https://img.shields.io/badge/Configuration-YAML-green)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-<p align="center">
-  <img src="docs/InsightForge_System_Architecture.png" alt="InsightForge System Architecture" width="850">
-</p>
+A configuration-driven analytics platform that transforms verified business metrics into executive-ready reports while keeping analytical computation and AI-generated communication strictly separate.
 
 ---
 
 ## Overview
 
-InsightForge separates analytical computation from executive communication. SQL and Python calculate every KPI, comparison, and business interpretation before any information reaches the language model. The language model is responsible only for converting verified findings into clear business narrative.
+InsightForge separates analytical computation from executive communication. SQL prepares analytical data, Python calculates KPIs and business interpretations, and the language model converts verified findings into executive-ready narrative. Every reported metric is produced before the language model is involved, ensuring reports remain deterministic, explainable, and traceable.
 
-The platform is configuration-driven, allowing the same analytics engine to support different business domains through external YAML configuration rather than changes to the core application. The current implementation has been validated across two independent domains: **Retail Sales Analytics** and **Telecom Service Assurance Analytics**.
-
-The result is a reporting framework that is deterministic, explainable, and easier to extend without compromising analytical integrity.
+The platform is configuration-driven, allowing the same analytics engine to support multiple business domains through external YAML configuration. The current implementation has been validated across Retail Sales Analytics and Telecom Service Assurance Analytics.
 
 ---
 
 ## Why InsightForge?
 
-- Deterministic analytics before AI-generated narrative.
-- Every reported value is traceable to SQL or Python computation.
-- Business interpretation follows predefined rules rather than AI inference.
-- The same engine supports multiple business domains through configuration.
-- The language model cannot calculate KPIs, infer trends, or generate unsupported conclusions.
+InsightForge was built around one principle: **analytics should be completed before narrative begins.**
+
+- Deterministic KPI calculation using SQL and Python
+- Rule-based business interpretation
+- AI limited to communicating verified findings
+- Explainable reporting with complete analytical traceability
+- Multi-domain support through configuration
 
 ---
 
 ## Key Features
 
-- Configuration-driven analytics using YAML.
-- Deterministic KPI calculation with SQL and Python.
-- Rule-based business interpretation.
-- Threshold-based KPI classification.
-- Period-over-period comparison where configured.
-- Executive report generation from verified findings.
-- Interactive analyst mode for business questions.
-- Multi-domain support without changing the core engine.
-- Explainable reporting with a clear audit trail.
+- Configuration-driven analytics engine
+- Deterministic KPI calculation
+- Business interpretation layer
+- Threshold-based KPI classification
+- Period-over-period comparison
+- Executive report generation
+- Interactive analyst mode
+- Multi-domain support
+- Explainable reporting
 
 ---
 
 ## System Architecture
 
-InsightForge follows a layered architecture where each component has a single responsibility. SQL performs data aggregation, the analytics engine calculates KPIs and business interpretations, and the language model communicates only verified findings. This separation ensures that analytical results remain deterministic while narrative generation stays strictly evidence-based.
+SQL performs data aggregation, Python calculates KPIs and business interpretations, and the language model communicates verified findings without altering their meaning.
 
-<p align="center">
-  <img src="docs/InsightForge_System_Architecture.png" alt="InsightForge System Architecture" width="900">
-</p>
+![InsightForge Architecture](docs/insightforge_architecture.png)
+
+---
+
+## Project Preview
+
+### Retail Sales Analytics
+
+| Executive Report |
+| ![](assets/screenshots/retail_executive_report.png) |
+| Interactive Analyst |
+| ![](assets/screenshots/retail_interactive_analyst.png) |
+
+---
+
+### Telecom Service Assurance Analytics
+
+| Executive Report |
+| ![](assets/screenshots/telecom_executive_report.png) |
+| Interactive Analyst |
+| ![](assets/screenshots/telecom_qna_management.png) |
 
 ---
 
 ## Supported Business Domains
 
-| Domain | Status | Description |
-|--------|:------:|-------------|
-| Retail Sales Analytics | ✅ Implemented | Sales performance, profitability, customer behaviour, and operational reporting. |
-| Telecom Service Assurance Analytics | ✅ Implemented | Service assurance, SLA performance, incident analytics, cost-to-serve, and operational diagnostics. |
-| Additional Business Domains | 🔄 Supported | New domains can be added through configuration without modifying the core analytics engine. |
+| Domain | Status | Purpose |
+|---------|:------:|---------|
+| Retail Sales Analytics | ✅ | Sales performance and profitability analysis |
+| Telecom Service Assurance Analytics | ✅ | Incident, SLA and cost-to-serve analysis |
+| Additional Business Domains | 🔄 | Supported through configuration |
 
 ---
 
@@ -66,50 +85,41 @@ InsightForge follows a layered architecture where each component has a single re
 
 | Category | Technologies |
 |----------|--------------|
-| Programming | Python 3 |
+| Programming | Python |
 | Database | MySQL |
-| Query Layer | SQL |
+| Analytics | SQL, Pandas |
 | ORM | SQLAlchemy |
-| Data Processing | Pandas |
 | AI | Claude API |
 | Configuration | YAML |
-| Report Generation | python-docx, ReportLab |
+| Reporting | python-docx, ReportLab |
 
 ---
 
 ## Project Highlights
 
 - One analytics engine validated across two independent business domains.
-- Configuration-driven design with no core code changes required for new domains.
-- Deterministic KPI calculation and business interpretation before AI narration.
-- Evidence-based reporting that prevents unsupported metrics, trends, and conclusions.
-- Separation of analytics, business logic, and executive communication into independent layers.
-- Interactive analyst mode and executive report generation built on the same verified analytical results.
-
----
-
-## Future Enhancements
-
-- Support additional business domains through configuration.
-- Expand the library of deterministic KPIs and business diagnostics.
-- Add broader period-over-period comparison capabilities.
-- Integrate interactive dashboards alongside report generation.
-- Continue extending business interpretation rules while preserving deterministic analytics.
+- Configuration-driven architecture requiring no core code changes.
+- Business interpretation completed before AI narration.
+- Deterministic, evidence-based reporting.
+- Clear separation between analytics, business logic, and executive communication.
 
 ---
 
 ## Repository Structure
 
 ```text
-InsightForge/
+InsightForge
 │
-├── agent/          # Executive narration and report generation
-├── config/         # Domain configurations (YAML)
-├── docs/           # BRD, architecture and documentation
-├── engine/         # KPI engine and business interpretation
-├── sql/            # Database schema and analytical queries
-├── reports/        # Generated executive reports
-├── main.py         # Application entry point
+├── agent/
+├── assets/
+│   └── screenshots/
+├── config/
+├── database/
+├── docs/
+├── engine/
+├── samples/
+├── tests/
+├── main.py
 ├── requirements.txt
 └── README.md
 ```
@@ -118,43 +128,28 @@ InsightForge/
 
 ## Getting Started
 
-### Prerequisites
-
-- Python 3.x
-- MySQL
-- Claude API Key
-
-### Installation
-
 ```bash
-git clone https://github.com/your-username/InsightForge.git
+git clone https://github.com/ankitattri05/InsightForge.git
 
 cd InsightForge
 
 pip install -r requirements.txt
-```
 
-### Configuration
-
-1. Create a `.env` file and add your database and Claude API credentials.
-2. Select the required domain configuration from the `config/` directory.
-3. Ensure the corresponding MySQL database is available.
-
-### Run
-
-```bash
 python main.py
 ```
+
+Configure your database connection and Claude API credentials before running the application.
 
 ---
 
 ## Documentation
 
-Project documentation is available in the **docs/** directory.
+Detailed documentation is available in the `docs` directory.
 
-- Business Requirements Document (BRD)
-- System Architecture
-- Project Documentation
+- Business Requirements Document
+- Architecture Overview
+- Data Dictionary
+- Project Structure
 
 ---
 
@@ -162,18 +157,12 @@ Project documentation is available in the **docs/** directory.
 
 **Ankit Attri**
 
-- LinkedIn: *Add Profile Link*
 - GitHub: https://github.com/ankitattri05
-- Email: *Add Email Address*
+- LinkedIn: *(Add your LinkedIn profile)*
+- Email: *(Add your email address)*
 
 ---
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
----
-
-## Acknowledgements
-
-InsightForge was developed as a portfolio project to demonstrate practical business analytics, deterministic reporting, and AI-assisted executive communication using SQL, Python, and modern analytics engineering practices.
+This project is licensed under the MIT License.
