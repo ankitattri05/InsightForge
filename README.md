@@ -5,7 +5,11 @@
 ![YAML](https://img.shields.io/badge/Configuration-YAML-green)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-A configuration-driven analytics platform that turns verified business metrics into executive-ready reports — AI narrates the findings; it never calculates them.
+A configuration-driven executive analytics platform that transforms verified business metrics into executive-ready reports and interactive business insights. AI communicates verified analytical findings—it never calculates business metrics.
+
+| Business Domains | Analytics Engine | Reports | Interactive Analyst |
+|-----------------:|:----------------:|:-------:|:-------------------:|
+| 2 | Configuration Driven | Executive Reports | Natural Language Q&A |
 
 ---
 
@@ -24,6 +28,25 @@ The current implementation has been validated across two independent business do
 
 ---
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Why InsightForge?](#why-insightforge)
+- [Key Features](#key-features)
+- [How It Works](#how-it-works)
+- [System Architecture](#system-architecture)
+- [Project Preview](#project-preview)
+- [Supported Business Domains](#supported-business-domains)
+- [Technology Stack](#technology-stack)
+- [Project Highlights](#project-highlights)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+- [Documentation](#documentation)
+- [Contact](#contact)
+- [License](#license)
+
+---
+
 ## Why InsightForge?
 
 InsightForge was built around one principle: **analytics should be completed before narrative begins.**
@@ -36,6 +59,16 @@ InsightForge was built around one principle: **analytics should be completed bef
 
 ---
 
+## Project Highlights
+
+- Validated across two independent business domains using the same analytics engine and application workflow.
+- Configuration-driven architecture enables new business domains without modifying the core application.
+- Deterministic KPI calculation and business interpretation performed before AI-generated narration.
+- Executive reports and interactive analyst mode use the same verified analytical results.
+- Clear separation between data processing, business logic, and executive communication to improve consistency, traceability, and maintainability.
+  
+
+---
 ## Key Features
 
 - Configuration-driven analytics engine
@@ -75,6 +108,8 @@ InsightForge follows a deterministic analytics workflow in which every business 
 SQL performs data aggregation, Python calculates KPIs and business interpretations, and the language model communicates verified findings without altering their meaning.
 
 ![InsightForge Architecture](docs/insightforge_architecture.png)
+
+InsightForge follows a deterministic analytics pipeline where every KPI is calculated and validated before any AI-generated narrative is produced.
 
 ---
 
@@ -127,16 +162,6 @@ The screenshots below demonstrate the same analytics framework operating across 
 | Configuration | YAML | Domain-specific configuration |
 | Reporting | python-docx, ReportLab | Executive report generation |
 
----
-
-## Project Highlights
-
-- Validated across two independent business domains using the same analytics engine and application workflow.
-- Configuration-driven architecture enables new business domains without modifying the core application.
-- Deterministic KPI calculation and business interpretation performed before AI-generated narration.
-- Executive reports and interactive analyst mode use the same verified analytical results.
-- Clear separation between data processing, business logic, and executive communication to improve consistency, traceability, and maintainability.
-  
 ---
 
 ## Repository Structure
