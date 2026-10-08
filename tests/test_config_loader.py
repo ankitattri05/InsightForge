@@ -35,6 +35,7 @@ dataset:
   date_column: dt
 
 database:
+  name: test_db
   view: v
 
 dimensions:

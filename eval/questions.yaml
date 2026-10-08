@@ -1,0 +1,128 @@
+﻿version: "1.0"
+
+description: >
+  A0 baseline evaluation for InsightForge LLM narrative reliability.
+  Questions are designed around evidence currently exposed by the
+  deterministic analytics and interactive analyst layers.
+
+questions:
+
+  - id: T01
+    domain: telecom
+    question: "What is the current SLA breach rate?"
+    test: number_fidelity
+    answerable: true
+
+  - id: T02
+    domain: telecom
+    question: "What is the current average resolution time?"
+    test: number_and_unit_fidelity
+    answerable: true
+
+  - id: T03
+    domain: telecom
+    question: "What is the total cost-to-serve?"
+    test: currency_fidelity
+    answerable: true
+
+  - id: T04
+    domain: telecom
+    question: "What is the total dispatch cost?"
+    test: currency_fidelity
+    answerable: true
+
+  - id: T05
+    domain: telecom
+    question: "How many customers were impacted?"
+    test: number_fidelity
+    answerable: true
+
+  - id: T06
+    domain: telecom
+    question: "Which state has the highest SLA breach rate?"
+    test: entity_binding
+    answerable: true
+
+  - id: T07
+    domain: telecom
+    question: "Which vendor has the highest SLA breach rate?"
+    test: entity_binding
+    answerable: true
+
+  - id: T08
+    domain: telecom
+    question: "Which fault category has the highest SLA breach rate?"
+    test: entity_binding
+    answerable: true
+
+  - id: T09
+    domain: telecom
+    question: "What does the latest 7-day SLA comparison show?"
+    test: comparison_direction
+    answerable: true
+
+  - id: T10
+    domain: telecom
+    question: "Does the highest-SLA-breach contributor prove that it caused the overall SLA problem?"
+    test: causal_boundary
+    answerable: false
+
+  - id: R01
+    domain: retail
+    question: "What are total sales?"
+    test: currency_fidelity
+    answerable: true
+
+  - id: R02
+    domain: retail
+    question: "What is total profit?"
+    test: currency_fidelity
+    answerable: true
+
+  - id: R03
+    domain: retail
+    question: "What is the overall profit margin?"
+    test: percentage_fidelity
+    answerable: true
+
+  - id: R04
+    domain: retail
+    question: "What is the average order value?"
+    test: currency_fidelity
+    answerable: true
+
+  - id: R05
+    domain: retail
+    question: "Which market has the highest sales?"
+    test: entity_binding
+    answerable: true
+
+  - id: R06
+    domain: retail
+    question: "Which category has the highest profit?"
+    test: entity_binding
+    answerable: true
+
+  - id: R07
+    domain: retail
+    question: "Which subcategory has the lowest profit?"
+    test: entity_binding_and_sign
+    answerable: true
+
+  - id: R08
+    domain: retail
+    question: "Which ship mode has the highest shipping cost?"
+    test: entity_binding
+    answerable: true
+
+  - id: R09
+    domain: retail
+    question: "Does the highest-profit category explain why total profit is high?"
+    test: causal_boundary
+    answerable: false
+
+  - id: R10
+    domain: retail
+    question: "Does the lowest-profit subcategory prove that it caused the overall profit result?"
+    test: causal_boundary
+    answerable: false

@@ -1,20 +1,23 @@
 """
 The only bridge between the LLM and the analytics engine.
 
-Validation is performed once during initialization.
-After successful validation, only verified metrics can be exposed
-to the LLM.
+Validation and semantic auditing are performed once during
+initialization. After successful validation, only verified metrics
+and deterministic business metadata can be exposed to the LLM.
 """
 
 from typing import Optional, TypedDict
-from engine.interpreter_telecom import interpret_metric
-from engine.interpreter_retail import interpret_retail_metric
 
+from engine.audit import audit_dataset
 from engine.config_loader import load_config
-from engine.metrics import calculate_metric
+from engine.interpreter_retail import interpret_retail_metric
+from engine.interpreter_telecom import interpret_metric
+from engine.metrics import calculate_metric_with_evidence
 from engine.validation import validate_metrics
 
+
 _config: Optional[dict] = None
+_audit: Optional[dict] = None
 _validation_passed = False
 
 
@@ -29,19 +32,25 @@ def initialize(
     expected_metrics: dict[str, float],
 ) -> None:
     """
-    Load configuration and verify all ground-truth metrics.
+    Load configuration, verify ground-truth metrics, and run the
+    deterministic semantic audit.
 
-    The agent refuses to start if validation fails.
+    The agent refuses to start if validation or semantic auditing
+    fails.
     """
 
     global _config
+    global _audit
     global _validation_passed
 
     _config = load_config(config_path)
 
     failures = [
         result
-        for result in validate_metrics(expected_metrics, _config)
+        for result in validate_metrics(
+            expected_metrics,
+            _config,
+        )
         if not result["passed"]
     ]
 
@@ -51,13 +60,18 @@ def initialize(
         pprint(failures)
         raise RuntimeError("Startup validation failed.")
 
+    _audit = audit_dataset(_config)
+
     _validation_passed = True
+
 
 def get_config() -> dict:
     """
-    Return the loaded project configuration.
+    Return the active semantic configuration.
     """
+
     return _config
+
 
 def _require_validation() -> None:
     """
@@ -72,20 +86,27 @@ def _require_validation() -> None:
 
 def get_metric(metric_name: str) -> ToolResult:
     """
-    Return one verified business metric.
+    Return one verified business metric with deterministic
+    interpretation and semantic evidence.
     """
 
     _require_validation()
 
     try:
-        value = calculate_metric(metric_name, _config)
+        metric_result = calculate_metric_with_evidence(
+            metric_name,
+            _config,
+        )
+
+        value = metric_result["value"]
+        evidence = metric_result["evidence"]
 
     except Exception as e:
         return {
-        "success": False,
-        "data": None,
-        "error": str(e),
-    }
+            "success": False,
+            "data": None,
+            "error": str(e),
+        }
 
     if value is None:
         return {
@@ -107,14 +128,32 @@ def get_metric(metric_name: str) -> ToolResult:
             metric_name,
             value,
             _config,
-    )
+        )
+
+    finding["finding_id"] = f"F-{metric_name.upper()}"
+    finding["evidence"] = evidence
+
+    if _audit is not None:
+        kpi_audit = _audit["kpis"].get(
+            metric_name,
+            {},
+        )
+
+        finding["additive_across"] = kpi_audit.get(
+            "additive_across",
+            [],
+        )
 
     return {
         "success": True,
         "data": {
             "metric": metric_name,
             "value": value,
-            "display_value": _format_metric(metric_name, value),
+            "display_value": _format_metric(
+                metric_name,
+                value,
+                _config["business_assumptions"]["currency"],
+            ),
             "finding": finding,
         },
         "error": None,
@@ -133,15 +172,11 @@ def get_metrics(
         for metric_name in metric_names
     ]
 
-def get_config() -> dict:
-    """
-    Return the active semantic configuration.
-    """
-    return _config
 
 def _format_metric(
     metric_name: str,
     value: float,
+    currency: str = "INR",
 ) -> str:
     """
     Return a deterministic display string for a KPI.
@@ -176,6 +211,7 @@ def _format_metric(
         "shipping_cost",
         "average_order_value",
     }:
-         return f"₹{value:,.2f}"
+        symbol = "$" if currency == "USD" else "₹"
+        return f"{symbol}{value:,.2f}"
 
     return str(value)

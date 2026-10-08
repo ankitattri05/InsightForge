@@ -55,10 +55,7 @@ def main() -> None:
 
     config = tools.get_config()
 
-    period = reporting_period(
-        view=config["database"]["view"],
-        date_column=config["dataset"]["date_column"],
-    )
+    period = reporting_period(config)
 
     # ----------------------------
     # Executive Brief

@@ -6,19 +6,79 @@ Transforms verified KPI values into verified business findings.
 No LLM logic belongs here.
 """
 
-from engine.diagnostics import retail_diagnostics
-
-from engine.diagnostics import multi_diagnostics
-from engine.comparison import compare_periods
 from typing import TypedDict
 
+from sqlalchemy import text
 
-class Finding(TypedDict):
+from engine.comparison import compare_periods
+from engine.db import get_engine, get_source
+from engine.diagnostics import retail_diagnostics
+
+
+class Finding(TypedDict, total=False):
+    finding_id: str
     metric: str
     value: float
+    unit: str
+    definition: str
+    n: int
+    additive: bool
+    additive_across: list[str]
+    evidence_class: str
+    not_established: list[str]
     status: str
+    headline: str
     business_meaning: str
     interpretation: str
+    diagnostics: dict
+    comparison: dict | None
+
+
+def _row_count(source: str) -> int:
+    """Return the number of physical rows supporting the finding."""
+
+    sql = text(
+        f"""
+        SELECT COUNT(*)
+        FROM {source}
+        """
+    )
+
+    with get_engine().connect() as connection:
+        return int(connection.execute(sql).scalar() or 0)
+
+
+def _base_finding(
+    metric_name: str,
+    value: float,
+    config: dict,
+    *,
+    unit: str,
+    definition: str,
+    additive: bool,
+    evidence_class: str,
+    not_established: list[str],
+) -> dict:
+    """
+    Build deterministic G1 finding metadata.
+
+    The metadata defines what the KPI means and the boundaries of
+    what can be concluded from it. The LLM does not define these.
+    """
+
+    source = get_source(config)
+
+    return {
+        "finding_id": f"retail:{metric_name}",
+        "metric": metric_name,
+        "value": value,
+        "unit": unit,
+        "definition": definition,
+        "n": _row_count(source),
+        "additive": additive,
+        "evidence_class": evidence_class,
+        "not_established": not_established,
+    }
 
 
 def interpret_retail_metric(
@@ -27,274 +87,336 @@ def interpret_retail_metric(
     config: dict,
 ) -> Finding:
 
-    if metric_name == "incident_count":
-
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning":
-                "Total incidents handled during the reporting period.",
-            "interpretation":
-                "Incident Count is workload volume. It should not be "
-                "classified using fixed thresholds because workload "
-                "depends on historical operating baseline."
-        }
-
-    if metric_name == "sla_breach_rate":
-
-        thresholds = config["thresholds"]["sla_breach_rate"]
-        comparison = compare_periods(
-            aggregation="AVG",
-            column="SLA_Breach_Flag",
-            view=config["database"]["view"],
-)
-        if value <= thresholds["good"]:
-            status = "Good"
-        elif value <= thresholds["warning"]:
-            status = "Warning"
-        else:
-            status = "Critical"
-        diagnostics = multi_diagnostics(
-            view=config["database"]["view"],
-        )
-        return {
-        "metric": metric_name,
-        "value": value,
-        "status": status,
-        "diagnostics": diagnostics,
-        "business_meaning":
-            "Percentage of incidents that breached SLA.",
-        "interpretation":
-            f"SLA breach rate is {value:.2%}, classified as "
-            f"{status} using configured business thresholds.",
-             "comparison": comparison,
-    }
-
-    if metric_name == "avg_resolution_time":
-
-        return {
-        "metric": metric_name,
-        "value": value,
-        "status": "Descriptive",
-        "business_meaning":
-            "Average time required to resolve an incident.",
-        "interpretation":
-            "Average Resolution Time should be compared against "
-            "a severity-weighted expected resolution time. "
-            "Until that baseline is implemented, this metric is "
-            "reported descriptively without Good/Warning/Critical "
-            "classification."
-    }
-
-    if metric_name == "total_cost":
-
-        return {
-        "metric": metric_name,
-        "value": value,
-        "status": "Descriptive",
-        "business_meaning":
-            "Total cost incurred to resolve all incidents during the reporting period.",
-        "interpretation":
-            "Total Cost-to-Serve is a scale-dependent financial metric. "
-            "It should not be classified using fixed thresholds. "
-            "Business interpretation should rely on derived KPIs such as "
-            "Cost per Incident and trend over time."
-    }
-
-    if metric_name == "cost_per_incident":
-
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning":
-                "Average cost incurred to resolve one incident.",
-            "interpretation":
-                "Cost per Incident should be interpreted using trend "
-                "comparison rather than fixed thresholds."
-        }
-
-    if metric_name == "customers_impacted":
-
-        return {
-        "metric": metric_name,
-        "value": value,
-        "status": "Descriptive",
-        "business_meaning":
-            "Total customers affected by reported service incidents.",
-        "interpretation":
-            f"{value:,.0f} customers were impacted during the reporting period. "
-            "This metric is reported descriptively, as no verified baseline or "
-            "historical comparison is available for performance evaluation."
-    }
-    
-    if metric_name == "dispatch_cost":
-
-     return {
-        "metric": metric_name,
-        "value": value,
-        "status": "Descriptive",
-        "business_meaning":
-            "Total field dispatch cost incurred to resolve service incidents.",
-        "interpretation":
-            f"Total dispatch cost was ₹{value:,.2f} during the reporting period. "
-            "This metric is reported descriptively, as no verified baseline or "
-            "historical comparison is available for performance evaluation."
-    }
+    source = get_source(config)
 
     if metric_name == "sales":
 
         diagnostics = retail_diagnostics(
-            view=config["database"]["view"],
+            view=source,
+            currency="$",
+        )
+
+        diagnostics["top_sales_market"] = (
+            diagnostics["top_sales_market"][:3]
+        )
+        diagnostics["top_profit_category"] = (
+            diagnostics["top_profit_category"][:3]
+        )
+        diagnostics["bottom_profit_subcategory"] = (
+            diagnostics["bottom_profit_subcategory"][:3]
+        )
+        diagnostics["top_shipping_cost_ship_mode"] = (
+            diagnostics["top_shipping_cost_ship_mode"][:3]
+        )
+
+        bottom_subcategory = (
+            diagnostics["bottom_profit_subcategory"][0]
         )
 
         headline = (
-        f"Lowest Profit Subcategory: "
-        f"{diagnostics['bottom_profit_subcategory'][0]['category']} "
-        f"({diagnostics['bottom_profit_subcategory'][0]['display']})"
-)
+            f"Lowest Profit Subcategory: "
+            f"{bottom_subcategory['category']} "
+            f"({bottom_subcategory['display']})"
+        )
 
-        diagnostics["top_sales_market"] = diagnostics["top_sales_market"][:3]
-        diagnostics["top_profit_category"] = diagnostics["top_profit_category"][:3]
-        diagnostics["bottom_profit_subcategory"] = diagnostics["bottom_profit_subcategory"][:3]
-        diagnostics["top_shipping_cost_ship_mode"] = diagnostics["top_shipping_cost_ship_mode"][:3]
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="configured currency",
+            definition=(
+                "Sum of sales across all rows in the reporting dataset."
+            ),
+            additive=True,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether sales performance is good or bad.",
+                "Does not establish profitability.",
+                "Does not establish the cause of sales changes.",
+            ],
+        )
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "headline": headline,
-            "diagnostics": diagnostics,
-            "business_meaning":
-                "Total sales revenue generated during the reporting period.",
-            "interpretation":
-                "Total Sales is a scale-dependent business metric. "
-                "It should be interpreted using historical trends "
-                "and period-over-period comparison rather than fixed thresholds."
-        }
+        finding.update(
+            {
+                "status": "Descriptive",
+                "headline": headline,
+                "diagnostics": diagnostics,
+                "business_meaning":
+                    "Total sales revenue generated during the reporting period.",
+                "interpretation":
+                    "Total Sales is a scale-dependent business metric. "
+                    "It should be interpreted using historical trends "
+                    "and period-over-period comparison rather than fixed thresholds.",
+            }
+        )
+
+        return finding
 
     if metric_name == "profit":
 
         diagnostics = retail_diagnostics(
-            view=config["database"]["view"],
+            view=source,
+            currency="$",
         )
 
-        diagnostics["top_profit_category"] = diagnostics["top_profit_category"][:3]
-        diagnostics["bottom_profit_subcategory"] = diagnostics["bottom_profit_subcategory"][:3]
+        diagnostics["top_profit_category"] = (
+            diagnostics["top_profit_category"][:3]
+        )
+        diagnostics["bottom_profit_subcategory"] = (
+            diagnostics["bottom_profit_subcategory"][:3]
+        )
+        diagnostics["profit_at_risk_concentration"] = (
+            diagnostics["profit_at_risk_concentration"][:3]
+        )
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning":
-                "Total profit generated during the reporting period.",
-            "interpretation":
-                "Total Profit is a scale-dependent business metric. "
-                "It should be interpreted using historical trends "
-                "and period-over-period comparison rather than fixed thresholds.",
-            "diagnostics": diagnostics,
-        }
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="configured currency",
+            definition=(
+                "Sum of profit across all rows in the reporting dataset."
+            ),
+            additive=True,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether profitability is good or bad.",
+                "Does not establish the cause of profit changes.",
+                "Does not establish future profitability.",
+            ],
+        )
+
+        finding.update(
+            {
+                "status": "Descriptive",
+                "business_meaning":
+                    "Total profit generated during the reporting period.",
+                "interpretation": (
+                    "Total Profit is a scale-dependent business metric. "
+                    "The profit-at-risk diagnostic identifies markets where "
+                    "30%+ discount losses are disproportionately concentrated "
+                    "relative to the market's sales footprint. "
+                    "This supports prioritization of disproportionate exposure "
+                    "without establishing that discounting caused the loss."
+                ),
+                "diagnostics": diagnostics,
+            }
+        )
+
+        return finding
 
     if metric_name == "orders":
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning":
-                "Total customer orders processed during the reporting period.",
-            "interpretation":
-                "Order volume reflects business activity. "
-                "It should be evaluated using historical trends "
-                "and seasonal comparisons rather than fixed thresholds."
-        }
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="orders",
+            definition=(
+                "Count of distinct order_id values in the reporting dataset."
+            ),
+            additive=False,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether order volume is good or bad.",
+                "Does not establish customer retention or demand causality.",
+                "Does not establish future order volume.",
+            ],
+        )
+
+        finding.update(
+            {
+                "status": "Descriptive",
+                "business_meaning":
+                    "Total customer orders processed during the reporting period.",
+                "interpretation":
+                    "Order volume reflects business activity. "
+                    "It should be evaluated using historical trends "
+                    "and seasonal comparisons rather than fixed thresholds.",
+            }
+        )
+
+        return finding
 
     if metric_name == "quantity":
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning":
-                "Total units sold during the reporting period.",
-            "interpretation":
-                "Units Sold represents sales volume. "
-                "It should be evaluated using historical trends, "
-                "product mix, and seasonal comparisons rather than "
-                "fixed thresholds."
-        }
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="units",
+            definition=(
+                "Sum of quantity across all rows in the reporting dataset."
+            ),
+            additive=True,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether unit volume is good or bad.",
+                "Does not establish the cause of volume changes.",
+                "Does not establish future unit demand.",
+            ],
+        )
+
+        finding.update(
+            {
+                "status": "Descriptive",
+                "business_meaning":
+                    "Total units sold during the reporting period.",
+                "interpretation":
+                    "Units Sold represents sales volume. "
+                    "It should be evaluated using historical trends, "
+                    "product mix, and seasonal comparisons rather than "
+                    "fixed thresholds.",
+            }
+        )
+
+        return finding
 
     if metric_name == "avg_shipping_days":
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning":
-                "Average shipping time required to deliver customer orders.",
-            "interpretation":
-                "Average Shipping Time should be evaluated using "
-                "service-level targets and historical trends rather "
-                "than fixed thresholds."
-        }
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="days",
+            definition=(
+                "Arithmetic mean of time_for_shipping across dataset rows."
+            ),
+            additive=False,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether shipping time meets a target.",
+                "Does not establish the cause of shipping delays.",
+                "Does not establish future delivery performance.",
+            ],
+        )
+
+        finding.update(
+            {
+                "status": "Descriptive",
+                "business_meaning":
+                    "Average shipping time required to deliver customer orders.",
+                "interpretation":
+                    "Average Shipping Time should be evaluated using "
+                    "verified service-level targets and historical trends "
+                    "rather than fixed thresholds.",
+            }
+        )
+
+        return finding
 
     if metric_name == "shipping_cost":
 
         diagnostics = retail_diagnostics(
-        view=config["database"]["view"],
-     )
+            view=source,
+            currency="$",
+        )
 
         diagnostics["top_shipping_cost_ship_mode"] = (
-        diagnostics["top_shipping_cost_ship_mode"][:3]
-     )
+            diagnostics["top_shipping_cost_ship_mode"][:3]
+        )
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning":
-            "Total shipping cost incurred during the reporting period.",
-        "interpretation":
-            "Shipping Cost is a scale-dependent logistics metric. "
-            "It should be interpreted using historical trends "
-            "and cost efficiency comparisons rather than fixed thresholds.",
-        "diagnostics": diagnostics,
-    }
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="configured currency",
+            definition=(
+                "Sum of shipping_cost across all rows in the reporting dataset."
+            ),
+            additive=True,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether shipping cost is efficient.",
+                "Does not establish the cause of shipping cost changes.",
+                "Does not establish future shipping cost.",
+            ],
+        )
+
+        finding.update(
+            {
+                "status": "Descriptive",
+                "business_meaning":
+                    "Total shipping cost incurred during the reporting period.",
+                "interpretation":
+                    "Shipping Cost is a scale-dependent logistics metric. "
+                    "It should be interpreted using historical trends "
+                    "and cost-efficiency comparisons rather than fixed thresholds.",
+                "diagnostics": diagnostics,
+            }
+        )
+
+        return finding
 
     if metric_name == "profit_margin":
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning": (
-                "Overall percentage of sales retained as profit."
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="rate",
+            definition=(
+                "Total profit divided by total sales for the reporting dataset."
             ),
-            "interpretation": (
-                "Profit margin is reported descriptively. "
-                "Evaluation requires historical comparison or target benchmarks."
-            ),
-            "diagnostics": None,
-            "comparison": None,
-        }
+            additive=False,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether the margin is good or bad without a benchmark.",
+                "Does not establish the cause of margin changes.",
+                "Does not establish future profitability.",
+            ],
+        )
+
+        finding.update(
+            {
+                "status": "Descriptive",
+                "business_meaning":
+                    "Overall percentage of sales retained as profit.",
+                "interpretation":
+                    "Profit Margin is reported descriptively. "
+                    "Evaluation requires historical comparison or "
+                    "verified target benchmarks.",
+                "diagnostics": None,
+                "comparison": None,
+            }
+        )
+
+        return finding
 
     if metric_name == "average_order_value":
 
-        return {
-            "metric": metric_name,
-            "value": value,
-            "status": "Descriptive",
-            "business_meaning": (
-                "Average revenue generated per customer order."
+        finding = _base_finding(
+            metric_name,
+            value,
+            config,
+            unit="configured currency per order",
+            definition=(
+                "Total sales divided by the count of distinct orders."
             ),
-            "interpretation": (
-                "Average order value is reported descriptively. "
-                "Evaluation requires historical comparison or target benchmarks."
-            ),
-            "diagnostics": None,
-            "comparison": None,
-        }
+            additive=False,
+            evidence_class="descriptive",
+            not_established=[
+                "Does not establish whether order value is good or bad without a benchmark.",
+                "Does not establish the cause of order-value changes.",
+                "Does not establish future order value.",
+            ],
+        )
+
+        finding.update(
+            {
+                "status": "Descriptive",
+                "business_meaning":
+                    "Average revenue generated per customer order.",
+                "interpretation":
+                    "Average Order Value is reported descriptively. "
+                    "Evaluation requires historical comparison or "
+                    "verified target benchmarks.",
+                "diagnostics": None,
+                "comparison": None,
+            }
+        )
+
+        return finding
 
     raise ValueError(
         f"No business interpretation defined for '{metric_name}'."

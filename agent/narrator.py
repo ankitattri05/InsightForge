@@ -15,6 +15,10 @@ Responsibilities
 import json
 
 from engine.diagnostics import reporting_period
+from engine.traceability import (
+    validate_finding_citations,
+    validate_finding_interpretations,
+)
 
 from pathlib import Path
 
@@ -29,6 +33,23 @@ _client: Anthropic | None = None
 _model: str | None = None
 _system_prompt: str | None = None
 
+def _format_comparison_interpretation(finding: dict) -> str:
+    interpretation = finding.get("comparison_interpretation")
+
+    if not isinstance(interpretation, dict):
+        return ""
+
+    classification = interpretation.get("classification")
+    meaning = interpretation.get("meaning")
+
+    if not classification or not meaning:
+        return ""
+
+    return (
+        "\nDeterministic Comparison Interpretation:\n"
+        f"Classification: {classification}\n"
+        f"Meaning: {meaning}"
+    )
 
 def initialize(
     api_key: str,
@@ -67,9 +88,23 @@ def generate_brief(metric_names: list[str]) -> str:
 
     results = tools.get_metrics(metric_names)
     scorecard = generate_scorecard(
-    results,
-    tools.get_config(),
-)
+        results,
+        tools.get_config(),
+    )
+
+    verified_findings = [
+        result["data"]["finding"]
+        for result in results
+        if result["success"]
+    ]
+
+    validation = validate_finding_interpretations(verified_findings)
+
+    if not validation["passed"]:
+        raise ValueError(
+            "Finding interpretation validation failed: "
+            + "; ".join(validation["errors"])
+        )
 
     failed = [
         result
@@ -86,18 +121,19 @@ Business Meaning: {result['data']['finding']['business_meaning']}
 Interpretation: {result['data']['finding']['interpretation']}
 Headline: {result['data']['finding'].get('headline', 'None')}
 Diagnostics: {result['data']['finding'].get('diagnostics', {})}
+Diagnostic Interpretation: {result['data']['finding'].get('diagnostic_interpretation', {})}
 Comparison:
 {
     (
         f"""Window: {result['data']['finding']['comparison']['window']}
-Previous: {result['data']['finding']['comparison']['previous']:.2%}
-Current: {result['data']['finding']['comparison']['current']:.2%}
-Direction: {result['data']['finding']['comparison']['direction']}
+Previous: {f"{result['data']['finding']['comparison']['previous']:.2%}" if result['data']['metric'] == 'sla_breach_rate' else f"?{result['data']['finding']['comparison']['previous']:,.2f}"}
+Current: {f"{result['data']['finding']['comparison']['current']:.2%}" if result['data']['metric'] == 'sla_breach_rate' else f"?{result['data']['finding']['comparison']['current']:,.2f}"}Direction: {result['data']['finding']['comparison']['direction']}
 Change: {result['data']['finding']['comparison']['change_pct']}%"""
     )
     if result["data"]["finding"].get("comparison")
     else "None"
-}"""
+}
+{_format_comparison_interpretation(result['data']['finding'])}"""
             if result["success"]
             else f"Unavailable: {result['error']}"
         )
@@ -105,21 +141,27 @@ Change: {result['data']['finding']['comparison']['change_pct']}%"""
     )
 
     period = reporting_period(
-        view=tools.get_config()["database"]["view"],
-        date_column=tools.get_config()["dataset"]["date_column"],
-)
+        config=tools.get_config()
+    )
 
     prompt = (
     "Write an executive business summary using ONLY the verified "
     "metrics and deterministic business findings below.\n\n"
+    "Treat any supplied Diagnostic Interpretation as the authoritative "
+    "deterministic business meaning. Preserve material quantified findings "
+    "from that interpretation, including concentration ratios, shares, "
+    "benchmark gaps, and estimated impacts. Do not omit quantified "
+    "evidence merely for brevity. Surface material investigation "
+    "priorities where relevant. Do not contradict it, invent causes, "
+    "or imply causality from observed associations.\n\n"
 
     "Report Metadata\n"
     f"Project: {tools.get_config()['project']['name']}\n"
     f"Version: {tools.get_config()['project']['version']}\n"
     f"Reporting Period: {period['start_date']} to {period['end_date']}\n\n"
 
-    "Currency: ₹\n"
-    "Format all monetary values in ₹.\n"
+    "Currency: ?\n"
+    "Format all monetary values in ?.\n"
     "Never use '$' or any other currency symbol.\n\n"
 
     "Resolution time is measured in minutes.\n"
@@ -247,6 +289,10 @@ def answer(question: str) -> str:
         elif "shipping cost" in question_lower:
             metric_names = ["shipping_cost"]
 
+        elif "average order value" in question_lower:
+            metric_names = ["average_order_value"]
+
+
         elif "sales" in question_lower:
             metric_names = ["sales"]
 
@@ -343,6 +389,20 @@ def answer(question: str) -> str:
 
     results = tools.get_metrics(metric_names)
 
+    verified_findings = [
+        result["data"]["finding"]
+        for result in results
+        if result["success"]
+    ]
+
+    validation = validate_finding_interpretations(verified_findings)
+
+    if not validation["passed"]:
+        raise ValueError(
+            "Finding interpretation validation failed: "
+            + "; ".join(validation["errors"])
+        )
+
     facts = "\n\n".join(
         (
             f"""Metric: {r['data']['metric']}
@@ -352,6 +412,9 @@ Business Meaning: {r['data']['finding']['business_meaning']}
 Interpretation: {r['data']['finding']['interpretation']}
 Headline: {r['data']['finding'].get('headline', 'None')}
 Diagnostics: {r['data']['finding'].get('diagnostics', {})}
+Diagnostic Interpretation: {r['data']['finding'].get('diagnostic_interpretation', {}).get('meaning', '')}
+Comparison Data: {r['data']['finding'].get('comparison', 'None')}S
+{_format_comparison_interpretation(r['data']['finding'])}
 """
         )
         for r in results
@@ -361,8 +424,7 @@ Diagnostics: {r['data']['finding'].get('diagnostics', {})}
     config = tools.get_config()
 
     period = reporting_period(
-        view=config["database"]["view"],
-        date_column=config["dataset"]["date_column"],
+        config=config,
     )
 
     response = _client.messages.create(
@@ -403,7 +465,7 @@ Include one brief evidence-based explanatory sentence only if supplied by the de
 
 Use ONLY the verified findings below.
 
-Preserve all monetary values exactly as supplied, including the ₹ symbol.
+Preserve all monetary values exactly as supplied, including the ? symbol.
 
 Verified Findings:
 
@@ -418,3 +480,6 @@ Verified Findings:
         for block in response.content
         if block.type == "text"
     )
+
+
+

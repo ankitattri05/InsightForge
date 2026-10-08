@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "source": "independent_sql_oracle",
+  "questions": {
+    "T01": {
+      "expected_value": "0.0999"
+    },
+    "T02": {
+      "expected_value": "248.8422"
+    },
+    "T03": {
+      "expected_value": "3103613147.00"
+    },
+    "T04": {
+      "expected_value": "35963570"
+    },
+    "T05": {
+      "expected_value": "19941620"
+    },
+    "T06": {
+      "expected_entity": "Goa",
+      "expected_value": "0.1333",
+      "n": 30
+    },
+    "T07": {
+      "expected_entity": "Tejas",
+      "expected_value": "0.1492",
+      "n": 4116
+    },
+    "T08": {
+      "expected_entity": "Optical Network",
+      "expected_value": "0.1974",
+      "n": 6417
+    },
+    "T09": {
+      "current_rate": "0.1196",
+      "previous_rate": "0.0936",
+      "percentage_point_change": "2.6000",
+      "relative_change_pct": "27.77777778",
+      "direction": "Increase"
+    },
+    "R01": {
+      "expected_value": "12642905.00"
+    },
+    "R02": {
+      "expected_value": "1469034.09"
+    },
+    "R03": {
+      "expected_value": "0.116194"
+    },
+    "R04": {
+      "expected_value": "505.009187"
+    },
+    "R05": {
+      "expected_entity": "APAC",
+      "expected_value": "3585833.00",
+      "n": 11002
+    },
+    "R06": {
+      "expected_entity": "Technology",
+      "expected_value": "663779.25",
+      "n": 10141
+    },
+    "R07": {
+      "expected_entity": "Tables",
+      "expected_value": "-64083.55",
+      "n": 861
+    },
+    "R08": {
+      "expected_entity": "Standard Class",
+      "expected_value": "614630.76",
+      "n": 30775
+    },
+    "T10": {
+      "test_type": "causal_boundary"
+    },
+    "R09": {
+      "test_type": "causal_boundary"
+    },
+    "R10": {
+      "test_type": "causal_boundary"
+    }
+  }
+}

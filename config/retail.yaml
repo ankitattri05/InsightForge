@@ -9,6 +9,7 @@ dataset:
   time_grain: week
 
 database:
+  name: p1
   view: vw_sales_flat
 
 dimensions:
@@ -55,11 +56,12 @@ kpis:
   average_order_value:
     label: Average Order Value
     type: calculated
-    formula: "sales / order_id"
+    formula: "sales / orders"
 
   orders:
     label: Total Orders
-    type: count
+    type: count_distinct
+    column: order_id
 
   quantity:
     label: Units Sold
@@ -78,6 +80,14 @@ kpis:
 
 thresholds: {}
 
+materiality:
+  minimum_n: 30
+  minimum_relative_change_pct: 10.0
+  minimum_rate_change_pp: 1.0
+  assumption_status: ASSUMED_CONFIG
+
 business_assumptions:
-  currency: INR
-  time_unit: Minutes
+  currency: USD
+  currency_status: ASSUMED_CONFIG
+  time_unit: Days
+

@@ -19,4 +19,4 @@ build/
 *.pdf
 
 .DS_Store
-Thumbs.db
+Thumbs.dbmysql-init.txt

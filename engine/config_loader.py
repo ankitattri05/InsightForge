@@ -9,7 +9,14 @@ whether a business number is correct.
 from pathlib import Path
 import yaml
 
-VALID_KPI_TYPES = {"count", "sum", "average", "rate","calculated"}
+VALID_KPI_TYPES = {
+    "count",
+    "count_distinct",
+    "sum",
+    "average",
+    "rate",
+    "calculated",
+}
 
 REQUIRED_TOP_LEVEL = [
     "project",
@@ -26,9 +33,9 @@ REQUIRED_DATASET_FIELDS = [
 ]
 
 REQUIRED_DATABASE_FIELDS = [
+    "name",
     "view"
 ]
-
 
 def load_config(config_path: str) -> dict:
     """
@@ -98,7 +105,11 @@ def _validate(config: dict) -> None:
             "'measures' must be a non-empty list"
         )
 
-    known_columns = set(config["measures"]) | set(config.get("flags", []))
+    known_columns = (
+    set(config["measures"])
+    | set(config.get("flags", []))
+    | {config["dataset"]["grain_column"]}
+    )
 
     for metric_name, metric in config["kpis"].items():
 
