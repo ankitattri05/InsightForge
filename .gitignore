@@ -20,3 +20,4 @@ build/
 
 .DS_Store
 Thumbs.dbmysql-init.txt
+eval/runs/
