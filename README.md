@@ -67,8 +67,41 @@ InsightForge was built around one principle: **analytics should be completed bef
 - Executive reports and interactive analyst mode use the same verified analytical results.
 - Clear separation between data processing, business logic, and executive communication to improve consistency, traceability, and maintainability.
   
+---
+## Evolution: v1.0 → Improved Analytics Engine
+
+InsightForge was developed from a working v1.0 baseline and then improved through measured analytical experiments.
+
+| Area | v1.0 Baseline | Improved Version |
+|---|---|---|
+| SLA analysis | Breach-rate reporting | Excess-breach impact prioritization |
+| Telecom cost analysis | Total cost reporting | Cost concentration analysis |
+| Telecom prioritization | Rate-based ranking | Impact-based ranking |
+| Retail loss analysis | Absolute 30%+ discount loss | Disproportionate loss concentration |
+| Analytical robustness | No confounding check | Fault-mix robustness validation |
+| Analyst workflow | Manual SQL + interpretation | Deterministic automated workflow |
+| Measured workflow time | 24.54 sec | 4.26 sec |
+| Workflow improvement | — | **82.6% reduction / 5.77× faster** |
+| Regression validation | — | **90/90 tests passed** |
+
+### Measured Improvements
+
+The improved engine produced measurable changes rather than simply adding features:
+
+- **Telecom:** Optical Network represented **25.67% of incidents but ~50.72% of estimated SLA breaches**, a **1.98× breach concentration**.
+- **Telecom:** Optical Network represented **25.67% of incidents but 49.81% of incident cost**, a **1.94× cost concentration**.
+- **Telecom:** State prioritization changed from **Goa** under simple breach-rate ranking to **Punjab** under excess-breach impact ranking.
+- **Retail:** The new priority ranking increased average top-3 concentration from **0.86× to 1.72× (+99.6%)**.
+- **Workflow:** A fixed eight-question retail analysis workflow decreased from **24.54 seconds to 4.26 seconds**, an **82.6% reduction in measured execution time**.
+- **Robustness:** Vendor and state top-3 rankings remained **3/3 unchanged** after fault-mix adjustment testing.
+- **Regression:** Final automated test suite completed with **90 passed, 0 failed**.
+
+> **The improved version was evaluated against explicit analytical baselines. Enhancements were retained only when they produced a measurable analytical or workflow improvement.**
+
+The original baseline is preserved in Git as [`v1.0-baseline`](https://github.com/ankitattri05/InsightForge/releases/tag/v1.0-baseline).
 
 ---
+
 ## Key Features
 
 - Configuration-driven analytics engine
@@ -103,6 +136,7 @@ InsightForge follows a deterministic analytics workflow in which every business 
    The same verified analytical results are used to answer business questions through the interactive analyst mode.
 
 ---
+
 ## System Architecture
 
 SQL performs data aggregation, Python calculates KPIs and business interpretations, and the language model communicates verified findings without altering their meaning.
