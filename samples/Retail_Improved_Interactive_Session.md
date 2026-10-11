@@ -71,9 +71,8 @@ The new prioritization was evaluated against the v1.0 baseline before being reta
 | Priority method | Absolute loss | **Disproportionate exposure** |
 | Top priority | EU | **EMEA** |
 | Avg. top-3 concentration | 0.86× | **1.72×** |
-| Change | — | **+99.6%** |
-| Decision | — | **KEEP** |
-
+| Top-3 absolute-loss coverage | 57.34% | 43.87% |
+| Decision | — | **KEEP — different prioritization objective** |
 ### What changed?
 
 **Before**
@@ -86,7 +85,9 @@ The new prioritization was evaluated against the v1.0 baseline before being reta
 
 ### Validation Outcome
 
-**KEEP — the improved diagnostic produced a materially different priority list and increased the average concentration of the prioritized markets from 0.86× to 1.72×.**
+**KEEP — the diagnostic serves a different prioritization objective: identifying markets with disproportionate high-discount loss exposure relative to sales.**
+
+The average concentration of the prioritized markets increased from 0.86× to 1.72×. However, top-three coverage of total absolute high-discount losses decreased from 57.34% to 43.87%. This is a trade-off between prioritizing disproportionate exposure and covering the largest absolute losses, not a demonstrated increase in overall profitability or loss reduction.
 
 The new ranking intentionally prioritizes **disproportionate exposure**, not total absolute loss. The top-three markets' share of total absolute high-discount loss decreased from **57.34% to 43.87%**, reflecting this deliberate trade-off.
 

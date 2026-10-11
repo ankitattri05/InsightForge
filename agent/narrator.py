@@ -160,9 +160,8 @@ Change: {result['data']['finding']['comparison']['change_pct']}%"""
     f"Version: {tools.get_config()['project']['version']}\n"
     f"Reporting Period: {period['start_date']} to {period['end_date']}\n\n"
 
-    "Currency: ?\n"
-    "Format all monetary values in ?.\n"
-    "Never use '$' or any other currency symbol.\n\n"
+    f"Currency: {tools.get_config()['business_assumptions']['currency']}\n"
+    "Preserve monetary values and currency symbols supplied by the analytics engine. Do not convert currencies.\n\n"
 
     "Resolution time is measured in minutes.\n"
     "Always write 'minutes' instead of 'time units'.\n\n"

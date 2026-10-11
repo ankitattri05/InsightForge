@@ -72,7 +72,7 @@ InsightForge was built around one principle: **analytics should be completed bef
 
 InsightForge was developed from a working v1.0 baseline and then improved through measured analytical experiments.
 
-| Area | v1.0 Baseline | Improved Version |
+| Area | v1.0 Baseline | Updated Approach |
 |---|---|---|
 | SLA analysis | Breach-rate reporting | Excess-breach impact prioritization |
 | Telecom cost analysis | Total cost reporting | Cost concentration analysis |
@@ -80,23 +80,21 @@ InsightForge was developed from a working v1.0 baseline and then improved throug
 | Retail loss analysis | Absolute 30%+ discount loss | Disproportionate loss concentration |
 | Analytical robustness | No confounding check | Fault-mix robustness validation |
 | Analyst workflow | Manual SQL + interpretation | Deterministic automated workflow |
-| Measured workflow time | 24.54 sec | 4.26 sec |
-| Workflow improvement | — | **82.6% reduction / 5.77× faster** |
 | Regression validation | — | **90/90 tests passed** |
 
-### Measured Improvements
+### Analytical Changes and Validation
 
 The improved engine produced measurable changes rather than simply adding features:
 
 - **Telecom:** Optical Network represented **25.67% of incidents but ~50.72% of estimated SLA breaches**, a **1.98× breach concentration**.
 - **Telecom:** Optical Network represented **25.67% of incidents but 49.81% of incident cost**, a **1.94× cost concentration**.
 - **Telecom:** State prioritization changed from **Goa** under simple breach-rate ranking to **Punjab** under excess-breach impact ranking.
-- **Retail:** The new priority ranking increased average top-3 concentration from **0.86× to 1.72× (+99.6%)**.
-- **Workflow:** A fixed eight-question retail analysis workflow decreased from **24.54 seconds to 4.26 seconds**, an **82.6% reduction in measured execution time**.
-- **Robustness:** Vendor and state top-3 rankings remained **3/3 unchanged** after fault-mix adjustment testing.
+- **Retail:** The exposure-concentration ranking prioritizes disproportionate high-discount losses rather than total absolute loss. Top-three coverage of total absolute high-discount losses decreased from **57.34% to 43.87%**, a deliberate trade-off.
+- **Workflow benchmark:** A single-run comparison measured 4.26 seconds for eight engine-only KPI lookups. The 24.54-second manual baseline included SQL, review, finding identification, and summary writing, so the figures are not directly comparable.
+-**Robustness validation:** Vendor and state top-3 rankings remained **3/3 unchanged** after fault-mix adjustment testing.
 - **Regression:** Final automated test suite completed with **90 passed, 0 failed**.
 
-> **The improved version was evaluated against explicit analytical baselines. Enhancements were retained only when they produced a measurable analytical or workflow improvement.**
+> The improved version was evaluated against explicit analytical baselines. Changes were retained when they served a defined analytical objective and passed the relevant validation checks; trade-offs are documented where applicable.
 
 The original baseline is preserved in Git as [`v1.0-baseline`](https://github.com/ankitattri05/InsightForge/releases/tag/v1.0-baseline).
 

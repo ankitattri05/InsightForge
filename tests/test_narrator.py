@@ -73,6 +73,7 @@ def test_generate_brief_includes_deterministic_comparison_interpretation(
             "database": {"view": "vw_incident_flat"},
             "dataset": {"date_column": "Open_Time"},
             "project": {"name": "Telecom Service Assurance", "version": "1.0"},
+                "business_assumptions": {"currency": "INR"},
         },
     )
     monkeypatch.setattr(
