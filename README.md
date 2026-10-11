@@ -91,7 +91,7 @@ The improved engine produced measurable changes rather than simply adding featur
 - **Telecom:** State prioritization changed from **Goa** under simple breach-rate ranking to **Punjab** under excess-breach impact ranking.
 - **Retail:** The exposure-concentration ranking prioritizes disproportionate high-discount losses rather than total absolute loss. Top-three coverage of total absolute high-discount losses decreased from **57.34% to 43.87%**, a deliberate trade-off.
 - **Workflow benchmark:** A single-run comparison measured 4.26 seconds for eight engine-only KPI lookups. The 24.54-second manual baseline included SQL, review, finding identification, and summary writing, so the figures are not directly comparable.
--**Robustness validation:** Vendor and state top-3 rankings remained **3/3 unchanged** after fault-mix adjustment testing.
+- **Robustness validation:** Vendor and state top-3 rankings remained **3/3 unchanged** after fault-mix adjustment testing.
 - **Regression:** Final automated test suite completed with **90 passed, 0 failed**.
 
 > The improved version was evaluated against explicit analytical baselines. Changes were retained when they served a defined analytical objective and passed the relevant validation checks; trade-offs are documented where applicable.
