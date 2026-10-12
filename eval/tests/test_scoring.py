@@ -276,4 +276,39 @@ def test_fault_injection_currency_corruption():
     assert classification == 'Wrong answer'
     assert failure == 'WRONG_NUMBER'
 
+def test_numeric_contradiction_is_rejected():
+    result = {
+        "question_id": "T02",
+        "status": "completed",
+        "response": (
+            "Average resolution time is 248.84 minutes, "
+            "but the actual average is 300 minutes."
+        ),
+    }
+    oracle = {"expected_value": "248.8422"}
+    assert score_question(result, oracle) == ("Wrong answer", "WRONG_NUMBER")
+
+
+def test_valid_numeric_correction_is_accepted():
+    result = {
+        "question_id": "T02",
+        "status": "completed",
+        "response": "Average resolution time is 248.84 minutes, not 300 minutes.",
+    }
+    oracle = {"expected_value": "248.8422"}
+    assert score_question(result, oracle) == ("Correct", None)
+
+
+def test_entity_contradiction_is_rejected():
+    result = {
+        "question_id": "T06",
+        "status": "completed",
+        "response": (
+            "Goa has the highest rate at 13.33%, "
+            "but Haryana is actually highest."
+        ),
+    }
+    oracle = {"expected_entity": "Goa", "expected_value": "0.1333"}
+    assert score_question(result, oracle) == ("Wrong answer", "WRONG_ENTITY")
+
 

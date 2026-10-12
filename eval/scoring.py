@@ -88,6 +88,50 @@ def has_fallback(response):
 def contains_expected_entity(response, expected_entity):
     return expected_entity.lower() in (response or "").lower()
 
+def has_contradictory_claim(response, expected_value=None, expected_entity=None):
+    text = response or ""
+    clauses = re.split(
+        r"\b(?:but|however|whereas)\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    if len(clauses) < 2:
+        return False
+
+    for index in range(1, len(clauses)):
+        before = clauses[index - 1].lower()
+        after = clauses[index].lower()
+
+        if expected_entity and expected_entity.lower() in before:
+            ranking_terms = ("highest", "lowest", "leading", "top", "ranked")
+            if (
+                any(term in before for term in ranking_terms)
+                and any(term in after for term in ranking_terms)
+                and expected_entity.lower() not in after
+            ):
+                return True
+
+        if expected_value is not None:
+            expected = normalize_number(expected_value)
+            before_values = extract_numbers(before)
+            after_values = extract_numbers(after)
+            shared_terms = set(re.findall(r"\b[a-z]{4,}\b", before)) & set(
+                re.findall(r"\b[a-z]{4,}\b", after)
+            )
+            ignored = {"that", "this", "with", "from", "actual", "average"}
+            shared_terms -= ignored
+
+            if (
+                expected is not None
+                and any(approximately_equal(v, expected) for v in before_values)
+                and any(not approximately_equal(v, expected) for v in after_values)
+                and shared_terms
+            ):
+                return True
+
+    return False
+
 
 def causal_boundary_passes(result):
     response = result.get("response", "")
@@ -109,6 +153,8 @@ def causal_boundary_passes(result):
         "does not prove that",
         "does not confirm that",
         "does not explain why",
+        "do not support a causal explanation",
+        "cannot conclude that",
         "cannot conclude that",
         "cannot establish that",
         "cannot establish causality",
@@ -137,6 +183,9 @@ def score_numeric_question(result, oracle):
     expected = normalize_number(oracle["expected_value"])
     actual_values = extract_numbers(response)
 
+    if has_contradictory_claim(response, expected_value=oracle["expected_value"]):
+        return "Wrong answer", "WRONG_NUMBER"
+
     if expected is None or not actual_values:
         return "Wrong answer", "WRONG_NUMBER"
 
@@ -156,6 +205,13 @@ def score_entity_question(result, oracle):
         return "Safe fallback", "FALLBACK"
 
     expected_entity = oracle["expected_entity"]
+
+    if has_contradictory_claim(
+        response,
+        expected_value=oracle["expected_value"],
+        expected_entity=oracle["expected_entity"],
+    ):
+        return "Wrong answer", "WRONG_ENTITY"
 
     if not contains_expected_entity(response, expected_entity):
         return "Wrong answer", "WRONG_ENTITY"
