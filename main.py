@@ -86,11 +86,18 @@ def main() -> None:
     print("Type 'exit' to quit.")
     print()
     print("Example questions:")
-    print("- What is the SLA breach rate?")
-    print("- Which state has the highest SLA breach rate?")
-    print("- Which vendor has the highest SLA breach rate?")
-    print("- Which fault category has the highest SLA breach rate?")
-    print("- Summarize the service assurance performance.")
+
+    if config["project"]["name"] == "Retail Sales Analytics":
+        print("- Summarize the business performance.")
+        print("- What is the profit margin?")
+        print("- What is the average order value?")
+        print("- What is the shipping cost?")
+    else:
+        print("- Summarize the service assurance performance.")
+        print("- What is the SLA breach rate?")
+        print("- Which state has the highest SLA breach rate?")
+        print("- Which vendor has the highest SLA breach rate?")
+        print("- Which fault category has the highest SLA breach rate?")
     print("=" * 80)
 
     try:

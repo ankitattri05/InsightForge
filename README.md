@@ -80,7 +80,7 @@ InsightForge was developed from a working v1.0 baseline and then improved throug
 | Retail loss analysis | Absolute 30%+ discount loss | Disproportionate loss concentration |
 | Analytical robustness | No confounding check | Fault-mix robustness validation |
 | Analyst workflow | Manual SQL + interpretation | Deterministic automated workflow |
-| Regression validation | — | **90/90 tests passed** |
+| Regression validation | — | **96/96 tests passed** |
 
 ### Analytical Changes and Validation
 
@@ -254,6 +254,14 @@ Supporting project documentation is available in the `docs` directory.
 
 ---
 
-## License
+## Copyright and Usage
 
-This project is licensed under the MIT License.
+Copyright © 2026 Ankit Attri. All rights reserved.
+
+InsightForge and its original source code, documentation, configuration files, and associated materials are proprietary.
+
+No license is granted to copy, modify, distribute, sublicense, or commercially exploit this project's contents without prior written permission from the copyright holder, except where applicable law or platform terms expressly permit otherwise.
+
+Viewing this public repository does not transfer ownership or grant rights to reuse its contents.
+
+For licensing or commercial inquiries, contact: ankitattri05@gmail.com

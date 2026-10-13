@@ -139,6 +139,9 @@ def _interpret_sla_diagnostics(diagnostics: dict) -> dict:
 
     top = top_faults[0]
 
+    top_vendors = diagnostics.get("top_vendor", [])
+    top_vendor = top_vendors[0] if top_vendors else None
+
     if not top.get("minimum_n_met", False):
         return {
             "status": "unavailable",
@@ -171,7 +174,27 @@ def _interpret_sla_diagnostics(diagnostics: dict) -> dict:
         "cost_concentration": top["cost_concentration"],
         "excess_breach_fault": excess_fault,
         "excess_breach_vendor": excess_vendor,
+        "top_vendor": top_vendor,
         "excess_breach_state": excess_state,
+        "vendor_meaning": (
+            (
+                f"{top_vendor['category']} has the highest observed SLA breach rate "
+                f"among qualifying vendors at {top_vendor['display']}, based on "
+                f"{top_vendor['n']} incidents with "
+                f"{top_vendor['observed_breaches']} observed breaches. "
+                "This observed difference is an investigation signal, not proof "
+                "that the vendor caused the breaches. "
+                "Next step: compare vendor incidents by fault category, site, "
+                "severity, and reporting period, where those dimensions are available, "
+                "before selecting a corrective action. "
+                "Evaluate any action against a pre-intervention breach-rate baseline "
+                "using comparable reporting windows, with incident volume, resolution "
+                "time, and cost as guardrails."
+                if top_vendor and top_vendor.get("minimum_n_met", False)
+                else "No qualifying vendor-level SLA breach-rate ranking is available."
+            )
+        ),
+
         "meaning": (
             f"{top['category']} has the highest observed SLA breach rate "
             f"among qualifying fault categories at {top['display']}, "
@@ -194,7 +217,15 @@ def _interpret_sla_diagnostics(diagnostics: dict) -> dict:
             f"with {top_excess_vendor['excess_breaches']:.0f}, and "
             f"{top_excess_state['category']} leads states with "
             f"{top_excess_state['excess_breaches']:.0f}. "
-            "This association does not establish root cause or causality."
+            "This association does not establish root cause or causality. "
+            "Next step: investigate the leading category by comparing its incidents "
+            "across available site, vendor, severity, and fault details before "
+            "selecting a corrective intervention. "
+            "Evaluate any intervention against a pre-intervention breach-rate baseline "
+            "using comparable reporting windows, and review incident volume, resolution "
+            "time, and cost as guardrails. The target must be agreed before the "
+            "intervention; excess breaches and associated incident cost are not "
+            "estimates of preventable incidents or recoverable savings."
         ),
     }
 
